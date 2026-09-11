@@ -118,15 +118,21 @@ CHECKS = {
             GROUP BY 1, 2 HAVING count(*) > 1
         )
     """,
-    "User logs: overview": """
-        SELECT min(date) AS first_day, max(date) AS last_day,
-               count(DISTINCT user_id) AS users,
+    "User logs: overview by source file": """
+        SELECT source_file, min(date) AS first_day, max(date) AS last_day,
+               count(*) AS rows, count(DISTINCT user_id) AS users,
                count(*) FILTER (WHERE total_secs > 86400) AS over_24h_days,
                count(*) FILTER (WHERE total_secs < 0) AS negative_days
         FROM staging.user_logs
+        GROUP BY 1 ORDER BY 1
     """,
-    "Churn labels: rate and coverage": """
-        SELECT count(*) AS users,
+    "User logs: duplicate user-days among valid days (expect 0)": """
+        SELECT sum(log_rows - active_days) AS duplicate_user_days,
+               max(active_days) AS max_days_in_a_week
+        FROM core.user_weeks
+    """,
+    "Churn labels: rate and coverage by expiry month": """
+        SELECT expiry_month, count(*) AS users,
                round(avg(is_churn::INT), 4) AS churn_rate,
                round(avg((user_id IN (SELECT user_id FROM staging.transactions))::INT), 3)
                    AS in_transactions,
@@ -135,6 +141,68 @@ CHECKS = {
                round(avg((user_id IN (SELECT user_id FROM staging.user_logs))::INT), 3)
                    AS in_march_logs
         FROM staging.churn_labels
+        GROUP BY 1 ORDER BY 1
+    """,
+    "Churn labels: share of users with a subscription expiring in the label month": """
+        SELECT c.expiry_month,
+               round(avg((EXISTS (
+                   SELECT 1 FROM staging.transactions t
+                   WHERE t.user_id = c.user_id
+                     AND date_trunc('month', t.expire_date) = c.expiry_month
+               ))::INT), 3) AS has_expiry_in_month,
+               count(*) FILTER (WHERE c.user_id IN (
+                   SELECT user_id FROM staging.churn_labels GROUP BY 1 HAVING count(*) > 1
+               )) AS users_in_both_months
+        FROM staging.churn_labels AS c
+        GROUP BY 1 ORDER BY 1
+    """,
+    "Model: subscriptions overview": """
+        SELECT count(*) AS subscriptions, count(DISTINCT user_id) AS users,
+               round(100 * avg(is_winback::INT), 1) AS pct_winback,
+               round(100 * avg(started_with_trial::INT), 1) AS pct_start_with_trial,
+               round(100 * avg((status = 'churned')::INT), 1) AS pct_churned,
+               median(length_days) AS median_length_days
+        FROM core.subscriptions
+    """,
+    "Model: churn vs KKBox February 2017 labels": """
+        WITH e AS (  -- each labelled user's expiry date in February
+            SELECT user_id, max(expire_date) AS expiry
+            FROM core.transactions
+            WHERE expire_date BETWEEN DATE '2017-02-01' AND DATE '2017-02-28'
+            GROUP BY 1
+        ),
+        feb AS (
+            SELECT
+                c.is_churn AS kkbox_churn,
+                -- Our rule: the membership lapsed for more than 30 days.
+                EXISTS (SELECT 1 FROM core.subscriptions s
+                        WHERE s.user_id = c.user_id
+                          AND s.end_date BETWEEN DATE '2017-02-01' AND DATE '2017-02-28')
+                    AS membership_churn,
+                -- KKBox's rule, reverse-engineered: no paid transaction dated
+                -- on or after the expiry, within 30 days.
+                NOT EXISTS (SELECT 1 FROM core.transactions t
+                            WHERE t.user_id = c.user_id AND NOT t.is_cancel
+                              AND t.amount_paid > 0
+                              AND t.transaction_date BETWEEN e.expiry AND e.expiry + 30)
+                    AS payment_churn
+            FROM staging.churn_labels AS c
+            JOIN e USING (user_id)
+            WHERE c.expiry_month = DATE '2017-02-01'
+        )
+        SELECT count(*) AS users,
+               round(100 * avg(kkbox_churn::INT), 2) AS kkbox_churn_pct,
+               round(100 * avg(membership_churn::INT), 2) AS membership_churn_pct,
+               round(100 * avg((kkbox_churn = membership_churn)::INT), 2) AS agree_membership_rule,
+               round(100 * avg((kkbox_churn = payment_churn)::INT), 2) AS agree_payment_rule
+        FROM feb
+    """,
+    "Activity: weekly listening table": """
+        SELECT count(*) AS user_weeks, count(DISTINCT user_id) AS users,
+               min(week) AS first_week, max(week) AS last_week,
+               median(active_days) AS median_active_days,
+               round(median(minutes_played)) AS median_minutes
+        FROM core.user_weeks
     """,
 }
 
@@ -142,6 +210,7 @@ CHECKS = {
 def main() -> None:
     pd.set_option("display.width", 200)
     con = duckdb.connect(str(DB_PATH), read_only=True)
+    con.execute("SET max_temp_directory_size = '6GB'")
     for title, sql in CHECKS.items():
         print(f"== {title}")
         print(con.sql(sql).df().to_string(index=False), end="\n\n")

@@ -26,7 +26,10 @@ def main() -> None:
     DB_PATH.unlink(missing_ok=True)
 
     con = duckdb.connect(str(DB_PATH))
-    con.execute("SET memory_limit = '10GB'")
+    con.execute("SET memory_limit = '8GB'")
+    con.execute("SET preserve_insertion_order = false")  # explicit ORDER BYs still hold
+    # Cap spill-to-disk so a heavy query fails instead of filling the disk.
+    con.execute("SET max_temp_directory_size = '6GB'")
 
     for path in sorted(SQL_DIR.glob("*.sql")):
         start = time.time()
