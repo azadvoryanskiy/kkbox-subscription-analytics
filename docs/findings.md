@@ -16,6 +16,8 @@ dollars (NT$).
 - **Churn is mostly about how people pay.** Manual renewals are 13% of renewal
   decisions but 57% of churn. With everything else held fixed, a manual
   renewal is about four times as likely to end in churn as an auto-renewal.
+  And it's not only who these people are: manual payers who switched to
+  auto-renew churned at about a third of the rate of those who stayed manual.
 - **The first renewal is where new subscribers are lost.** It's 7% of renewal
   decisions and 34% of churn. Manual payers at their first renewal are 3.5% of
   decisions and 28% of all churn.
@@ -106,7 +108,36 @@ held at its real mix.
   time and auto-renewers 6.9%. By the 13th payment it's 6.5% against 2.1%.
 - **Caveat:** this is observational. People who choose to pay manually may be
   less committed to begin with, and no regression can fully rule that out.
-  That's why the recommendation comes with a test.
+  The next check gets closer to it.
+
+### Is it the person or the payment setup?
+
+Take monthly subscriptions that started with two payments on the same setup,
+and look at what happened after the third payment changed it, or didn't.
+Third payments with periods ending March 2015 – September 2016.
+
+| First two payments | Third payment | Subscriptions | Churned by the 5th payment |
+|---|---|---|---|
+| Manual | Switched to auto-renew | 3,761 | **10.2%** |
+| Manual | Stayed manual | 167,986 | **37.1%** |
+| Auto-renew | Switched to manual | 1,694 | 36.5% |
+| Auto-renew | Stayed on auto-renew | 921,967 | 5.6% |
+
+- **Churn follows the new setup, in both directions.** People who moved to
+  auto-renew started to churn like auto-renewers, and people who moved to
+  manual started to churn like manual payers.
+- **The switchers weren't simply the keener users.** Before switching, manual
+  payers who moved to auto-renew listened slightly less than those who stayed
+  (18.5 vs 19.5 active days in four weeks). People who moved to manual listened
+  more than those who stayed on auto-renew (17.4 vs 11.7), and still churned
+  far more.
+- At the same listening level before the switch, manual payers who switched
+  churned 8–18% by the fifth payment, against 33–60% for those who stayed.
+  The 1,281 who kept the same payment method and only changed the setting
+  churned 10.0%.
+- **Caveat:** switching is still a choice, and the switcher groups are small.
+  This makes "the setup itself matters" much more likely, but only a test can
+  prove it.
 
 ## 4. Are newer customers worse than older ones?
 
@@ -182,9 +213,9 @@ Why there:
 - Across all tenures, manual renewals lose about 22,000 subscribers a month:
   57% of all churn in 2016.
 
-This is not a promise of lower churn by some percentage. Part of the gap
-between manual and auto-renew payers is who these people are. The test shows
-how much of the gap the payment setup itself explains.
+This is not a promise of lower churn by some percentage. The switcher
+comparison suggests much of the gap between manual and auto-renew payers comes
+from the setup itself, but it's still observational. The test shows how much.
 
 ### How to test it
 
