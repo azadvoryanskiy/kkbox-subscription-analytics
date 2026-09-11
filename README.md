@@ -5,6 +5,7 @@
 Work in progress. The full write-up will live in `docs/` and on the portfolio site.
 
 The questions the project answers: [docs/questions.md](docs/questions.md).
+What the analysis found so far: [docs/findings.md](docs/findings.md).
 
 ## Data
 
