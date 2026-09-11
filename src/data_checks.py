@@ -164,6 +164,19 @@ CHECKS = {
                median(length_days) AS median_length_days
         FROM core.subscriptions
     """,
+    "Model: lapses and billing gaps (share of gap weeks with listening)": """
+        SELECT count(*) FILTER (WHERE lapsed_before) AS lapses,
+               count(*) FILTER (WHERE lapse_listening_share > 0.25) AS over_25pct,
+               count(*) FILTER (WHERE is_billing_gap) AS over_50pct_billing_gaps,
+               count(*) FILTER (WHERE lapse_listening_share >= 0.8) AS over_80pct,
+               count(*) FILTER (WHERE expiry_extended) AS expiries_extended
+        FROM core.transactions
+    """,
+    "Model: paid subscriptions that end before their first payment (edge case)": """
+        SELECT count(*) AS subscriptions
+        FROM core.subscriptions
+        WHERE paid_number IS NOT NULL AND end_date < first_payment_date
+    """,
     "Model: churn vs KKBox February 2017 labels": """
         WITH e AS (  -- each labelled user's expiry date in February
             SELECT user_id, max(expire_date) AS expiry

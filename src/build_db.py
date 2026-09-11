@@ -4,10 +4,12 @@ Rebuilds data/processed/kkbox.duckdb from scratch: runs every file in sql/
 in name order, then prints the row count of each table.
 
 Usage (from the repo root):
-    python src/build_db.py
+    python src/build_db.py                          # full rebuild
+    python src/build_db.py sql/04_marts.sql         # rerun some files on the existing database
 """
 
 import os
+import sys
 import time
 from pathlib import Path
 
@@ -18,12 +20,16 @@ DB_PATH = ROOT / "data" / "processed" / "kkbox.duckdb"
 SQL_DIR = ROOT / "sql"
 
 
-def main() -> None:
+def main(files: list[str]) -> None:
     os.chdir(ROOT)  # SQL files use paths relative to the repo root
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    # Start from an empty file: DuckDB doesn't shrink a file when tables are
-    # replaced, so rebuilding in place keeps growing it.
-    DB_PATH.unlink(missing_ok=True)
+    if files:
+        paths = [ROOT / f for f in files]
+    else:
+        # Start from an empty file: DuckDB doesn't shrink a file when tables
+        # are replaced, so rebuilding in place keeps growing it.
+        DB_PATH.unlink(missing_ok=True)
+        paths = sorted(SQL_DIR.glob("*.sql"))
 
     con = duckdb.connect(str(DB_PATH))
     con.execute("SET memory_limit = '8GB'")
@@ -31,7 +37,7 @@ def main() -> None:
     # Cap spill-to-disk so a heavy query fails instead of filling the disk.
     con.execute("SET max_temp_directory_size = '6GB'")
 
-    for path in sorted(SQL_DIR.glob("*.sql")):
+    for path in paths:
         start = time.time()
         con.execute(path.read_text())
         print(f"{path.name}: {time.time() - start:.0f}s")
@@ -51,4 +57,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])

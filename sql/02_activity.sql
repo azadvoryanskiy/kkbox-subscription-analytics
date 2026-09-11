@@ -7,6 +7,8 @@
 -- Aggregating all ~100M user-weeks in one pass needs more memory than a laptop
 -- has, so the table is filled in eight passes, one slice of users at a time.
 
+CREATE SCHEMA IF NOT EXISTS core;
+
 CREATE OR REPLACE TABLE core.user_weeks (
     user_id            INTEGER,
     week               DATE,     -- weeks start on Monday

@@ -62,6 +62,9 @@ where each row came from.
   still subscribed when the data ends, so they're not a problem for churn.
 - `payment_plan_days` is 0 on 3.8% of rows, even though those users paid NT$149
   and got about 31 days. The plan length field can't be trusted on its own.
+- 18,316 paid rows (0.09%) carry an expiry more than 5 days short of their plan
+  length, mostly from one rare payment method. The model extends them to the
+  plan length. Shortfalls of a day or two are just calendar months and stay.
 - **Free trials:** 582k rows with a 7-day plan and NT$0 paid, across 536k users.
   This is the trial step of the lifecycle.
 - **Cancellations** are 3.9% of rows. On a cancel row, the expiry date is almost
@@ -110,22 +113,22 @@ renews a few days early, often onto a longer plan, has no payment after the
 expiry date and gets labelled churned, even though their membership never
 lapsed.
 
-In February 2017, **37.6% of the users KKBox labels as churned were still
+In February 2017, **37.7% of the users KKBox labels as churned were still
 members.** The gap is biggest exactly where customers are most committed:
 
 | Current plan (Feb 2017) | Users | KKBox label churn | Membership lapsed |
 |---|---|---|---|
-| Monthly | 964,951 | 5.1% | 3.4% |
-| 3–6 months | 16,187 | 46.8% | 21.5% |
-| 12+ months | 9,001 | 60.0% | 26.3% |
-| All | 992,931 | 6.39% | 4.04% |
+| Monthly | 964,805 | 5.1% | 3.4% |
+| 3–6 months | 16,189 | 46.8% | 21.4% |
+| 12+ months | 9,003 | 60.0% | 26.2% |
+| All | 992,784 | 6.39% | 4.02% |
 
 A model trained on this label would learn that customers who commit to a long
 plan are likely to leave. That's close to backwards.
 
 ## The subscription model
 
-`sql/02_subscriptions.sql` turns billing rows into subscriptions.
+`sql/03_subscriptions.sql` turns billing rows into subscriptions.
 
 - A **subscription** is an unbroken stretch of membership. It starts with a
   user's first transaction, or with a transaction more than 30 days after their
@@ -135,24 +138,63 @@ plan are likely to leave. That's close to backwards.
   payment shortens the expiry only 0.06% of the time, while cancel rows
   shorten it 54% of the time.
 - A subscription **churns** when the membership expires and nothing new comes
-  in within 30 days. When that 30-day window runs past 31 Mar 2017, the
-  outcome isn't known yet and the status is `active_at_data_end`.
-- Result: **3,073,709 subscriptions across 2,425,986 users.** 21.1% are
-  win-backs, 16.2% start with a free trial, 60.1% had churned by the end of the
-  data, and the median subscription lasts 146 days.
-- Against KKBox's February labels, the membership rule agrees on 97.54% of
+  in within 30 days, unless the lapse turns out to be a billing gap (next
+  section). When the 30-day window runs past 31 Mar 2017, the outcome isn't
+  known yet and the status is `active_at_data_end`.
+- Result: **2,829,863 subscriptions across 2,425,986 users.** 14.3% are
+  win-backs, 17.5% start with a free trial, 56.7% had churned by the end of the
+  data, and the median subscription lasts 157 days.
+- Against KKBox's February labels, the membership rule agrees on 97.55% of
   users. The whole difference is the payment-vs-membership point above.
-- **Known limit:** for users who were already subscribed before January 2015,
+- **Known limits.** For users who were already subscribed before January 2015,
   the model only sees the part of the subscription inside the data, so their
-  start dates are too late. 37,464 subscriptions even start with a cancel row
-  for this reason. Cohort analysis will use users who registered in 2015 or later.
+  start dates are too late. Cohort analysis uses users who registered in 2015
+  or later. 4,112 paid subscriptions (0.15%) end before their first payment
+  because of odd rows, mostly at the very start of the data; they're left out
+  of the monthly counts.
+
+## Billing gaps: lapses that aren't churn
+
+The first version of the model showed 122,000 subscribers leaving in March
+2016, three times a normal month, and 102,000 coming back in July 2016. Both
+spikes were mostly the same 64,573 people: subscribers paying with method 39
+whose billing stopped in March and restarted for all of them on one day,
+31 July 2016.
+
+They never left. Their listening didn't change:
+
+| Share listening in a given week | Jan 2016 | Apr 2016 | Jun 2016 | Aug 2016 |
+|---|---|---|---|---|
+| Method 39, "lapsed" in March, re-billed 31 Jul | 82% | 85% | 85% | 83% |
+| Method 39, billed without a break | 94% | 94% | 95% | 94% |
+| Lapsed in March on other methods, never came back | 48% | 3.5% | 1.4% | 1.1% |
+
+The same thing happened in 2015 with methods 31, 33 and 34: a churn spike in
+April 2015 and 69,428 "returns" on a single day, 30 June 2015. Smaller batches
+show up on other days too (30 Nov 2015, 1 Feb 2016, 7 Apr 2016, 1 Aug 2016).
+
+**The rule.** A lapse counts as a billing gap, not churn, when the user
+listened in more than half of the full weeks inside it. The subscription then
+continues through the gap. This is safe because real churners stop listening:
+of users who churned and never came back, 81% don't listen at all in the next
+8 weeks, and only 0.7% listen in 6 of them or more.
+
+- 238,559 of 642,436 lapses (37%) are billing gaps. The split barely depends on
+  the threshold: 270,171 lapses have listening in more than a quarter of their
+  weeks, 204,905 in 80% or more.
+- With the rule, March 2016 churn drops from 122k to 51k and July 2016 returns
+  from 102k to 27k.
+- **Caveat for the listening analysis.** Because the rule uses listening,
+  "people who keep listening don't churn" is partly built into it. The
+  billing-only view is kept (`lapsed_before` in `core.transactions`), so any
+  listening result can be checked without the rule.
 
 ## Modelling decisions
 
-The churn rule needs a second look: it was agreed as "the same as KKBox", and
-KKBox's label turned out to measure payments rather than membership (see
-above). The rest are technical clean-up choices and can be revisited if the
-analysis shows a problem.
+The churn rule was first agreed as "the same as KKBox". Once KKBox's label
+turned out to measure payments rather than membership (see above), it was
+changed to the membership rule on Sept 10 2026. The rest are technical
+clean-up choices and can be revisited if the analysis shows a problem.
 
 | Issue | Decision |
 |---|---|
@@ -162,8 +204,10 @@ analysis shows a problem.
 | Expiry after 2018 | Keep; the user is still subscribed when the data ends |
 | Unreliable `payment_plan_days` | Take subscription length from the expiry date |
 | Cancel rows | The cancel row's expiry date is the end of the membership; its amount is not revenue |
-| Churn | **To confirm.** Proposed: the membership lapsed for more than 30 days. KKBox's payment rule is kept as a check |
-| Win-back | A transaction more than 30 days after the previous membership ended |
+| Churn | The membership lapsed for more than 30 days (confirmed). KKBox's payment rule is kept as a check |
+| Win-back | A transaction more than 30 days after the previous membership ended, unless it's a billing gap |
+| Lapse while the user kept listening | Billing gap, not churn: the subscription continues through it |
+| Expiry more than 5 days short of the plan length | Extend it to the plan length |
 | Trial | 7-day plan with NT$0 paid |
 | Subscriptions started before 2015 | Real start unknown; cohorts use users who registered from 2015 on |
 | Demographics | Not used for segmentation. Too much is missing. Segments come from billing and listening behaviour instead |
