@@ -8,7 +8,8 @@ months. But every month about 3.3% of subscribers leave, roughly as many as it
 signs up. This project models 23M real billing transactions and 410M days of
 listening to find where that churn comes from.
 
-**Read the [case study](docs/case_study.md)** for the short version.
+**Read the [case study](docs/case_study.md)** for the short version. The interactive
+dashboard is in [dashboard/](dashboard/) and is published with GitHub Pages.
 
 ## What I found
 
@@ -37,8 +38,9 @@ All three are in the [data notes](docs/data_notes.md).
 | [docs/questions.md](docs/questions.md) | The six questions the project answers |
 | [docs/data_notes.md](docs/data_notes.md) | What's in the data, its traps, and every modelling rule |
 | [notebooks/](notebooks/) | The analysis, with charts: [01 subscribers and lifecycle](notebooks/01_subscribers_and_lifecycle.ipynb), [02 who churns](notebooks/02_who_churns.ipynb), [03 listening and win-back](notebooks/03_listening_and_winback.ipynb) |
-| [sql/](sql/) | The data model in DuckDB SQL: staging, weekly listening, subscriptions, marts |
-| [src/](src/) | Build script, data checks, logs extraction, chart and analysis helpers |
+| [dashboard/](dashboard/) | The interactive dashboard: one static page (HTML + Apache ECharts) on small exported aggregates, filterable by channel |
+| [sql/](sql/) | The data model in DuckDB SQL: staging, weekly listening, subscriptions, marts, dashboard marts |
+| [src/](src/) | Build script, data checks, logs extraction, dashboard export, chart and analysis helpers |
 
 The data is from 2015–2017. It's old, but subscription mechanics (plans,
 auto-renew, cancellations, win-back) haven't changed.
@@ -73,7 +75,13 @@ python src/extract_user_logs.py       # once: user_logs.csv.7z -> Parquet, ~2 mi
 python src/build_db.py                # builds data/processed/kkbox.duckdb, ~3 min
 python src/data_checks.py             # optional: the numbers behind docs/data_notes.md
 jupytext --to ipynb --execute notebooks/01_subscribers_and_lifecycle.py   # re-run a notebook
+python src/export_dashboard_data.py   # refresh dashboard/data/*.json
+python -m http.server 8765 --directory dashboard   # preview the dashboard at localhost:8765
 ```
+
+The dashboard is a plain static page: no build step, no server. It reads six
+small JSON files of aggregates (about 27 KB in total, nothing at user level),
+so it can be published without the underlying data.
 
 The notebooks are kept as `.py` files (the source) and `.ipynb` files (the
 rendered output with charts). Charts are saved to `docs/img/`.

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Who is KKBox losing? Subscriber churn dashboard</title>
+  <meta name="description" content="Dashboard for a product analytics case study on 2.4M real subscribers of KKBox, a Taiwanese music streaming service.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <header>
+    <h1>Who is KKBox losing?</h1>
+    <p>Paying subscribers of KKBox, a Taiwanese music streaming service, January 2016 to February 2017.
+       This is the dashboard behind a product analytics case study on 23M real billing transactions and 410M days of listening.</p>
+    <p class="links">
+      <a href="https://github.com/azadvoryanskiy/kkbox-subscription-analytics/blob/main/docs/case_study.md">Read the case study</a>
+      <a href="https://github.com/azadvoryanskiy/kkbox-subscription-analytics">Code and data model on GitHub</a>
+    </p>
+  </header>
+
+  <div class="filters">
+    <span class="label" id="channel-label">Sign-up channel</span>
+    <div class="seg" role="radiogroup" aria-labelledby="channel-label" id="channel-filter"></div>
+    <span class="note">Filters every number and chart below, except the switcher check.</span>
+  </div>
+
+  <section class="kpis" aria-label="Key numbers">
+    <div class="tile"><div class="label">Paying subscribers, Feb 2017</div><div class="value" id="kpi-subs">–</div><div class="sub" id="kpi-subs-sub"></div></div>
+    <div class="tile"><div class="label">Monthly churn</div><div class="value" id="kpi-churn">–</div><div class="sub">of paying subscribers, Jul 2016 – Feb 2017</div></div>
+    <div class="tile"><div class="label">New subscribers a month</div><div class="value" id="kpi-new">–</div><div class="sub">average, Jul 2016 – Feb 2017</div></div>
+    <div class="tile"><div class="label">Churn from manual renewals</div><div class="value" id="kpi-manual">–</div><div class="sub" id="kpi-manual-sub"></div></div>
+  </section>
+
+  <div class="grid">
+    <figure class="card wide">
+      <h2 id="t-flows">About as many subscribers leave each month as join</h2>
+      <p class="subtitle">Paying subscribers per month: new, returning after a break, and churned</p>
+      <div class="chart" id="c-flows"></div>
+      <details><summary>Show the numbers</summary><div class="table-wrap" id="tb-flows"></div></details>
+    </figure>
+
+    <figure class="card">
+      <h2 id="t-share">Manual renewals</h2>
+      <p class="subtitle">Share of renewal decisions and of churn, periods ending in 2016</p>
+      <div class="chart" id="c-share" style="height: 200px"></div>
+      <details><summary>Show the numbers</summary><div class="table-wrap" id="tb-share"></div></details>
+    </figure>
+
+    <figure class="card">
+      <h2 id="t-tenure">Churn by renewal number and payment type</h2>
+      <p class="subtitle">Share of renewal decisions that ended in churn, 2016, by which payment in the subscription it was</p>
+      <div class="chart" id="c-tenure"></div>
+      <details><summary>Show the numbers</summary><div class="table-wrap" id="tb-tenure"></div></details>
+    </figure>
+
+    <figure class="card">
+      <h2 id="t-listening">Listening before a renewal</h2>
+      <p class="subtitle">Churn per renewal decision by days with listening in the 4 weeks before, monthly plans, 2016</p>
+      <div class="chart" id="c-listening"></div>
+      <details><summary>Show the numbers</summary><div class="table-wrap" id="tb-listening"></div></details>
+    </figure>
+
+    <figure class="card">
+      <h2 id="t-retention">Retention of new subscribers</h2>
+      <p class="subtitle">Share with a paid subscription N months after their first payment, cohorts Sep 2015 – Feb 2016</p>
+      <div class="chart" id="c-retention"></div>
+      <details><summary>Show the numbers</summary><div class="table-wrap" id="tb-retention"></div></details>
+    </figure>
+
+    <figure class="card">
+      <h2>People whose payment just stopped come back; people who cancel don't</h2>
+      <p class="subtitle">Share of churned paid subscribers who pay again within 180 days, churned Jul 2015 – Jun 2016</p>
+      <div class="chart" id="c-winback" style="height: 240px"></div>
+      <details><summary>Show the numbers</summary><div class="table-wrap" id="tb-winback"></div></details>
+    </figure>
+
+    <figure class="card">
+      <h2>Churn follows the payment setup, in both directions</h2>
+      <p class="subtitle">Monthly subscriptions with two payments on one setup, then the third on the same or the other. Share churned by the 5th payment. All channels.</p>
+      <div class="chart" id="c-switchers" style="height: 240px"></div>
+      <details><summary>Show the numbers</summary><div class="table-wrap" id="tb-switchers"></div></details>
+    </figure>
+  </div>
+
+  <footer>
+    <h2>How to read this</h2>
+    <ul>
+      <li><strong>Paying subscriber:</strong> counted from their first payment to the end of the subscription. Free trials that never paid are not counted.</li>
+      <li><strong>Churn:</strong> the membership lapsed for more than 30 days. Billing outages, where people kept listening while billing stopped, are not churn.</li>
+      <li><strong>Renewal decision:</strong> every time a paid period ends, the subscriber either pays again or leaves.</li>
+      <li><strong>Channel</strong> is the sign-up channel. KKBox anonymised the codes, so they are shown as numbers.</li>
+    </ul>
+    <p>Data: KKBox, from the WSDM Cup 2018 churn challenge on Kaggle, 2015–2017. Only aggregates are published here.
+       All rules and checks are in the <a href="https://github.com/azadvoryanskiy/kkbox-subscription-analytics/blob/main/docs/data_notes.md">data notes</a>.
+       Built with DuckDB, Python and Apache ECharts. By Artem Zadvoryanskiy.</p>
+  </footer>
+</main>
+<script src="vendor/echarts.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

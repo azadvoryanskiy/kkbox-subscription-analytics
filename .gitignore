@@ -1,5 +1,6 @@
-# Data is never committed. See README for how to get it.
-data/
+# Raw and processed data are never committed. See README for how to get them.
+# (dashboard/data/ is different: small published aggregates, committed on purpose.)
+/data/
 *.duckdb
 *.duckdb.wal
 
@@ -7,10 +8,5 @@ data/
 .venv/
 __pycache__/
 .ipynb_checkpoints/
-
-# Evidence dashboard
-node_modules/
-dashboard/.evidence/
-dashboard/build/
 
 .DS_Store
