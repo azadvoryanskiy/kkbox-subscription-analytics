@@ -1,8 +1,8 @@
 # Findings
 
-The analysis behind the case study, question by question. Charts and the
-written case study come next; this is the working record of what the data
-says.
+The analysis behind the [case study](case_study.md), question by question.
+Every number comes from the notebooks in `notebooks/`, which re-run on the
+database that `src/build_db.py` builds.
 
 Churn here means the membership lapsed for more than 30 days, with billing
 gaps excluded (see [data_notes.md](data_notes.md)). Money is in New Taiwan
@@ -15,7 +15,7 @@ dollars (NT$).
   subscribers who arrive.
 - **Churn is mostly about how people pay.** Manual renewals are 13% of renewal
   decisions but 57% of churn. With everything else held fixed, a manual
-  renewal is about four times as likely to end in churn as an auto-renewal.
+  renewal is more than four times as likely to end in churn as an auto-renewal.
   And it's not only who these people are: manual payers who switched to
   auto-renew churned at about a third of the rate of those who stayed manual.
 - **The first renewal is where new subscribers are lost.** It's 7% of renewal
@@ -65,11 +65,11 @@ New users only: registered from 2015 on, so their whole history is visible.
   trial and 4.4% of them ever paid. Channel 4, where most trials come from,
   converts 2.3%; channel 3 6.3%; channel 9 10.7%.
 - **Trial converts churn faster.** About 45% of them are still subscribed a
-  year after their first payment, against 65% of people who paid from day one.
+  year after their first payment, against 66% of people who paid from day one.
 - **The first renewal is the big drop.** 11.4% of new paying subscribers leave
   at their first renewal. After that it's 4.8%, 4.0%, then 2–3% a month.
 - About 65% of new subscribers are still paying a year after their first
-  payment, 57% after 18 months.
+  payment, 58% after 18 months.
 - **Longer first plans delay churn but don't prevent it.** 18 months after the
   first payment, 50% of people who started on a 3–12 month plan are still
   subscribed, against 58% of people who started monthly.
@@ -88,19 +88,19 @@ held at its real mix.
 | Factor | Level | Raw churn | Adjusted |
 |---|---|---|---|
 | Payment | Auto-renew | 2.3% | 2.6% |
-| | Manual | 19.2% | **11.4%** |
-| Tenure (payment number in the subscription) | 1st | 21.0% | **10.8%** |
+| | Manual | 19.7% | **11.7%** |
+| Tenure (payment number in the subscription) | 1st | 21.1% | **10.8%** |
 | | 2nd | 9.4% | 5.9% |
 | | 3rd | 6.3% | 4.7% |
-| | 13th or later | 2.3% | 3.2% |
-| Plan | Monthly | 4.0% | 4.5% |
-| | 3–6 months | 25.6% | 5.2% |
-| | 12+ months | 33.3% | 5.3% |
-| Started with a free trial | No / Yes | 4.5% / 14.4% | 4.5% / 4.1% |
-| Channel | 7 | 1.6% | 4.6% |
-| | 9 | 6.6% | 4.1% |
-| | 3 | 9.7% | 4.1% |
-| | 4 | 14.6% | 4.2% |
+| | 13th or later | 2.2% | 3.1% |
+| Plan | Monthly | 4.1% | 4.5% |
+| | 3–6 months | 26.7% | 5.4% |
+| | 12+ months | 31.8% | 4.9% |
+| Started with a free trial | No / Yes | 4.5% / 14.8% | 4.6% / 4.3% |
+| Channel | 7 | 1.6% | 4.8% |
+| | 9 | 6.6% | 4.0% |
+| | 3 | 10.0% | 4.1% |
+| | 4 | 15.1% | 4.2% |
 
 - **Payment type and tenure carry the signal.** Channel, plan length and trials
   add almost nothing once those two are known.
@@ -148,9 +148,9 @@ Third payments with periods ending March 2015 – September 2016.
   (cohorts Sep 2015 – Feb 2016): channel 7 keeps 86%, channel 9 57%, channel 4
   53%, channel 3 52%.
 - **Retention slipped only because of the mix.** Month-3 retention fell from
-  85.0% (cohorts Jul–Nov 2015) to 83.7% (Jul–Nov 2016). The shift toward
-  channel 4 alone cost 3.8 points; within the channels, retention actually
-  improved by 1.2 points.
+  85.0% (cohorts Jul–Nov 2015) to 83.6% (Jul–Nov 2016). The shift toward
+  channel 4 cost 2.6 points; within the channels, retention actually improved
+  by 1.2 points. (Channel "other" is left out: it had no new users in 2015.)
 - Together with question 3: channel 4's weak retention comes from how its users
   pay. Half of its new users start on a free trial, and three in four first
   renewals in channels 3, 4 and 9 are manual. In channel 7 almost none are.
@@ -250,7 +250,7 @@ from the setup itself, but it's still observational. The test shows how much.
 
 - The data is from 2015–2017, and channel and payment-method codes are anonymised.
 - Everything in question 3 is observational. The regression has a pseudo R² of
-  0.19: payment type and tenure explain a real share of churn, not all of it.
+  0.20: payment type and tenure explain a real share of churn, not all of it.
 - New-user analyses use users with a member record who registered from 2015 on.
   18% of paying users have no member record and are left out of those.
 - The billing-gap rule uses listening. Question 5 was checked without it.

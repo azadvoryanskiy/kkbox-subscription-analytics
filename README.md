@@ -1,23 +1,54 @@
 # KKBox subscriber churn: product analytics case study
 
-**Question:** which subscribers is a music streaming service losing, and what would I change?
+**Question:** which subscribers is a music streaming service losing, and what
+would I change?
 
-Work in progress. The full write-up will live in `docs/` and on the portfolio site.
+KKBox, a Taiwanese music streaming service, grew its paying base by 30% in 14
+months. But every month about 3.3% of subscribers leave, roughly as many as it
+signs up. This project models 23M real billing transactions and 410M days of
+listening to find where that churn comes from.
 
-The questions the project answers: [docs/questions.md](docs/questions.md).
-What the analysis found so far: [docs/findings.md](docs/findings.md).
+**Read the [case study](docs/case_study.md)** for the short version.
+
+## What I found
+
+- **Churn is mostly about how people pay.** Manual renewals are 13% of renewal
+  decisions and 57% of churn. The first renewal is the riskiest moment.
+- **Channels, long plans and free trials look bad in the raw numbers**, but once
+  payment type and tenure are accounted for, the differences almost disappear.
+- **It's the setup, not just the person.** Manual payers who switched to
+  auto-renew churned at about a third of the rate of those who stayed manual.
+
+**Recommendation:** switch auto-renew on by default at checkout for new
+subscribers in the channels where most people pay manually, tested with an A/B
+test on churn at the first renewal (design in the case study).
+
+Three things in the data had to be fixed before any of this was trustworthy:
+half the transaction history sits in a second file, KKBox's own churn label
+counts payments rather than membership, and some "churn" was billing outages.
+All three are in the [data notes](docs/data_notes.md).
+
+## What's in the repo
+
+| Path | What it is |
+|---|---|
+| [docs/case_study.md](docs/case_study.md) | The case study: problem, data, findings, recommendation, test design |
+| [docs/findings.md](docs/findings.md) | The full analysis, question by question |
+| [docs/questions.md](docs/questions.md) | The six questions the project answers |
+| [docs/data_notes.md](docs/data_notes.md) | What's in the data, its traps, and every modelling rule |
+| [notebooks/](notebooks/) | The analysis, with charts: [01 subscribers and lifecycle](notebooks/01_subscribers_and_lifecycle.ipynb), [02 who churns](notebooks/02_who_churns.ipynb), [03 listening and win-back](notebooks/03_listening_and_winback.ipynb) |
+| [sql/](sql/) | The data model in DuckDB SQL: staging, weekly listening, subscriptions, marts |
+| [src/](src/) | Build script, data checks, logs extraction, chart and analysis helpers |
+
+The data is from 2015–2017. It's old, but subscription mechanics (plans,
+auto-renew, cancellations, win-back) haven't changed.
 
 ## Data
 
-KKBox is a Taiwanese music streaming service. The data comes from the
+The data comes from the
 [WSDM Cup 2018 churn challenge](https://www.kaggle.com/competitions/kkbox-churn-prediction-challenge)
-on Kaggle: real subscription transactions and daily listening logs.
-
-The data is from 2015–2017. It's old, but subscription mechanics (plans, auto-renew,
-cancellations, win-back) haven't changed.
-
-To reproduce, accept the competition rules on Kaggle, download these files and
-unpack them into `data/raw/`:
+on Kaggle. It isn't committed to this repo. To reproduce, accept the
+competition rules on Kaggle and put these files into `data/raw/`:
 
 | File | Contents |
 |---|---|
@@ -32,10 +63,6 @@ unpack them into `data/raw/`:
 The `_v2` files are not newer versions: each one continues the history of the
 file without `_v2`. You need both of each pair.
 
-The data is not committed to this repo.
-
-What's in the data, its quirks and how they're handled: [docs/data_notes.md](docs/data_notes.md).
-
 ## Build
 
 ```bash
@@ -43,6 +70,10 @@ brew install sevenzip                 # 7-Zip command-line tool, to stream the l
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 python src/extract_user_logs.py       # once: user_logs.csv.7z -> Parquet, ~2 min
-python src/build_db.py                # builds data/processed/kkbox.duckdb
+python src/build_db.py                # builds data/processed/kkbox.duckdb, ~3 min
 python src/data_checks.py             # optional: the numbers behind docs/data_notes.md
+jupytext --to ipynb --execute notebooks/01_subscribers_and_lifecycle.py   # re-run a notebook
 ```
+
+The notebooks are kept as `.py` files (the source) and `.ipynb` files (the
+rendered output with charts). Charts are saved to `docs/img/`.
