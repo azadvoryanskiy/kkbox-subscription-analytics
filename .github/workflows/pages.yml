@@ -2,9 +2,14 @@ name: Publish dashboard
 
 # Serves the dashboard/ folder as this repo's GitHub Pages site. The page is
 # static (HTML, JS and small JSON aggregates), so there is nothing to build.
-# Manual trigger for now: on the free plan, Pages needs the repo to be public.
+# Runs whenever the dashboard changes, or by hand.
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "dashboard/**"
+      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:

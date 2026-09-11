@@ -3,6 +3,8 @@
 *A product analytics case study on 2.4M real subscribers of KKBox, a Taiwanese
 music streaming service, 2015–2017.*
 
+**[Open the interactive dashboard](https://azadvoryanskiy.github.io/kkbox-subscription-analytics/)**, filterable by sign-up channel.
+
 ## The problem
 
 KKBox grew its paying base by 30% in 14 months, to 1.18M subscribers. But
@@ -100,6 +102,7 @@ anonymised. Everything above except the test is observational.
 
 ## The work behind it
 
+- [Interactive dashboard](https://azadvoryanskiy.github.io/kkbox-subscription-analytics/), with the same numbers by sign-up channel
 - [Findings](findings.md): the full analysis, question by question
 - Notebooks: [subscribers and lifecycle](../notebooks/01_subscribers_and_lifecycle.ipynb),
   [who churns](../notebooks/02_who_churns.ipynb),

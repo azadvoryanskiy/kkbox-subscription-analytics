@@ -8,8 +8,8 @@ months. But every month about 3.3% of subscribers leave, roughly as many as it
 signs up. This project models 23M real billing transactions and 410M days of
 listening to find where that churn comes from.
 
-**Read the [case study](docs/case_study.md)** for the short version. The interactive
-dashboard is in [dashboard/](dashboard/) and is published with GitHub Pages.
+**Read the [case study](docs/case_study.md)** for the short version, or
+**[open the interactive dashboard](https://azadvoryanskiy.github.io/kkbox-subscription-analytics/)** (source in [dashboard/](dashboard/)).
 
 ## What I found
 
