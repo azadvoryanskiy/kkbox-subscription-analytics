@@ -3,10 +3,12 @@
 **Question:** which subscribers is a music streaming service losing, and what
 would I change?
 
-KKBox, a Taiwanese music streaming service, grew its paying base by 30% in 14
-months. But every month about 3.3% of subscribers leave, roughly as many as it
-signs up. This project models 23M real billing transactions and 410M days of
-listening to find where that churn comes from.
+KKBox, a Taiwanese music streaming service, grew its paying base 30% in 14
+months, from 904,000 to 1.18M. But that growth is running out: new sign-ups fell
+from about 49,000 a month to 38,000 while churn stayed flat, so by February 2017
+it was losing almost exactly as many subscribers as it signed up. This project
+models 23M real billing transactions and 410M days of listening to find where
+that churn comes from.
 
 **Read the [case study](docs/case_study.md)** for the short version, or
 **[open the interactive dashboard](https://azadvoryanskiy.github.io/kkbox-subscription-analytics/)** (source in [dashboard/](dashboard/)).

@@ -7,10 +7,13 @@ music streaming service, 2015–2017.*
 
 ## The problem
 
-KKBox grew its paying base by 30% in 14 months, to 1.18M subscribers. But
-every month about 3.3% of them leave: 33,000 to 43,000 people, roughly as many
-as it signs up. And sign-ups were slowing down. The question a head of product
-would ask: which subscribers are we losing, and what should we change?
+KKBox grew its paying base 30% in 14 months, from 904,000 to 1.18M
+subscribers. But that growth is running out. New sign-ups fell from about
+49,000 a month to 38,000 while churn stayed flat at 33,000–43,000, so by
+February 2017 the service lost 38,363 subscribers and signed up 37,862 — the
+paying base was still growing only because 12,000 people a month came back
+after a break. The question a head of product would ask: which subscribers are
+we losing, and what should we change?
 
 ![About as many subscribers leave each month as join](img/01_monthly_flows.png)
 
